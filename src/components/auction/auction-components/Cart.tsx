@@ -28,6 +28,210 @@ import Cookies from 'js-cookie';
 import CustomModal from '../../custom-components/CustomModal';
 import { useNavigate } from 'react-router-dom';
 
+// Move CheckoutForm outside Cart to prevent remounting and input losing focus
+import React from 'react';
+
+interface CheckoutFormProps {
+    clientEmail: string;
+    setClientEmail: (v: string) => void;
+    handleClosePaymentModal: () => void;
+    lot: any;
+    email: string;
+    setPaymentSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+    navigate: any;
+    paymentRequest: (payload: any) => Promise<any>;
+}
+
+const CheckoutForm: React.FC<CheckoutFormProps> = ({
+    clientEmail,
+    setClientEmail,
+    handleClosePaymentModal,
+    lot,
+    email,
+    setPaymentSuccess,
+    navigate,
+    paymentRequest,
+}) => {
+    const stripe = useStripe();
+    const elements = useElements();
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
+    const [emailError, setEmailError] = useState<string | null>(null);
+
+    const validateEmail = (email: string) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    };
+
+    const handleSubmit = async (e: any) => {
+        e.preventDefault();
+
+        if (!stripe || !elements) {
+            return;
+        }
+
+        setLoading(true);
+        setMessage("");
+
+        const cardElement: any = elements.getElement(CardElement);
+        const { token, error }: any = await stripe.createToken(cardElement);
+
+        if (error) {
+            setMessage(error.message);
+            setLoading(false);
+            return;
+        }
+
+        const invoiceId: string = getQueryParam('paymentId')!;
+        const payload = {
+            Token: token.id,
+            // Amount: parseFloat(lot.BidStartAmount),
+            Description: lot.ShortDescription,
+            Email: clientEmail || email,
+            InvoiceId: parseInt(invoiceId)
+        }
+        try {
+            const response = await paymentRequest(payload);
+
+            if (response.status === 201) {
+                setPaymentSuccess(true);
+                setTimeout(() => {
+                    setPaymentSuccess(false);
+                    navigate('/home')
+                }, 3000);
+            } else {
+                ErrorMessage("Payment failed. Please try again.");
+            }
+        } catch (err: any) {
+            console.error("Error processing payment: " + err.message);
+        } finally {
+            handleClosePaymentModal();
+        }
+
+        setLoading(false);
+    };
+
+    return (
+        <form onSubmit={handleSubmit} style={{
+            minWidth: 360,
+            maxWidth: 410,
+            minHeight: 340,
+            margin: '0 auto',
+            padding: '32px 28px 0 28px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            background: 'none',
+            border: 'none',
+            boxShadow: 'none',
+            borderRadius: 22,
+            position: 'relative',
+        }}>
+            {/* Close (X) icon */}
+            <button
+                type="button"
+                onClick={handleClosePaymentModal}
+                style={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    background: 'transparent',
+                    border: 'none',
+                    fontSize: 22,
+                    color: '#888',
+                    cursor: 'pointer',
+                    zIndex: 2
+                }}
+                aria-label="Close"
+            >
+                ×
+            </button>
+            <div style={{
+                width: 52,
+                height: 52,
+                marginBottom: 14,
+                borderRadius: 14,
+                background: 'linear-gradient(135deg, #635bff 0%, #6ee7b7 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}>
+                <span style={{
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: 34,
+                    fontFamily: 'Inter, Helvetica Neue, Arial, sans-serif',
+                    letterSpacing: 1
+                }}>S</span>
+            </div>
+            <Typography variant="h5" gutterBottom style={{ fontWeight: 800, marginBottom: 8, color: '#32325d', fontSize: 24 }}>
+                Stripe Payment
+            </Typography>
+            <Typography variant="body1" style={{ color: '#6b7c93', marginBottom: 16, textAlign: 'center', fontSize: 16 }}>
+                Pay securely with your card
+            </Typography>
+            {/* Email input */}
+            <input
+                type="email"
+                placeholder="Email address"
+                value={clientEmail}
+                onChange={e => {
+                    setClientEmail(e.target.value);
+                    if (e.target.value && !validateEmail(e.target.value)) {
+                        setEmailError("Invalid email format");
+                    } else {
+                        setEmailError(null);
+                    }
+                }}
+                required
+                style={{
+                    width: '100%',
+                    marginBottom: 18,
+                    padding: '12px 14px',
+                    fontSize: 16,
+                    borderRadius: 8,
+                    border: '1px solid #e0e0e0',
+                    outline: 'none',
+                    fontFamily: 'Inter, Helvetica Neue, Arial, sans-serif',
+                    boxSizing: 'border-box',
+                }}
+            />
+            {emailError && <Typography color="error" sx={{ mt: -1, fontSize: 14 }}>{emailError}</Typography>}
+            <div style={{ width: '100%', marginBottom: 22 }}>
+                <CardElement options={{
+                    hidePostalCode: true,
+                    style: {
+                        base: {
+                            fontSize: '19px',
+                            color: '#32325d',
+                            fontFamily: 'Inter, Helvetica Neue, Helvetica, Arial, sans-serif',
+                            '::placeholder': { color: '#aab7c4', fontStyle: 'italic', fontSize: '18px' },
+                            backgroundColor: '#fff',
+                            padding: '16px 0',
+                            letterSpacing: '0.6px',
+                        },
+                        invalid: {
+                            color: '#fa755a',
+                            iconColor: '#fa755a',
+                        },
+                    },
+                }} />
+            </div>
+            <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={!stripe || loading}
+                fullWidth
+                sx={{ mt: 2, fontWeight: 700, fontSize: 18, borderRadius: 3, background: '#635bff', height: 48, '&:hover': { background: '#7a6fff' } }}
+            >
+                {loading ? "Processing..." : "PAY NOW"}
+            </Button>
+            {message && <Typography color="error" sx={{ mt: 2, fontSize: 15 }}>{message}</Typography>}
+        </form>
+    );
+};
+
 const Cart = () => {
     const [amount, setAmount] = useState("");
     const [clientEmail, setClientEmail] = useState("");
@@ -97,87 +301,91 @@ const Cart = () => {
     }, [])
 
 
-    const CheckoutForm = () => {
-        const stripe = useStripe();
-        const elements = useElements();
-        const [loading, setLoading] = useState(false);
-        const [message, setMessage] = useState("");
+    // Move email state up to parent to prevent input losing focus
+
+    const [checkoutEmail, setCheckoutEmail] = useState("");
+
+    //   const CheckoutForm = () => {
+    //     const stripe = useStripe();
+    //     const elements = useElements();
+    //     const [loading, setLoading] = useState(false);
+    //     const [message, setMessage] = useState("");
 
 
-        const handleSubmit = async (e: any) => {
-            e.preventDefault();
+    //     const handleSubmit = async (e: any) => {
+    //         e.preventDefault();
 
-            if (!stripe || !elements) {
-                return;
-            }
+    //         if (!stripe || !elements) {
+    //             return;
+    //         }
 
-            setLoading(true);
-            setMessage("");
+    //         setLoading(true);
+    //         setMessage("");
 
-            const cardElement: any = elements.getElement(CardElement);
-            const { token, error }: any = await stripe.createToken(cardElement);
+    //         const cardElement: any = elements.getElement(CardElement);
+    //         const { token, error }: any = await stripe.createToken(cardElement);
 
-            if (error) {
-                setMessage(error.message);
-                setLoading(false);
-                return;
-            }
+    //         if (error) {
+    //             setMessage(error.message);
+    //             setLoading(false);
+    //             return;
+    //         }
 
-            const invoiceId: string = getQueryParam('paymentId')!;
-            const payload = {
-                Token: token.id,
-                Amount: parseFloat(lot.BidStartAmount),
-                Description: lot.ShortDescription,
-                Email: email,
-                InvoiceId: parseInt(invoiceId)
-            }
-            try {
-                const response = await paymentRequest(payload);
+    //         const invoiceId: string = getQueryParam('paymentId')!;
+    //         const payload = {
+    //             Token: token.id,
+    //             Amount: parseFloat(lot.BidStartAmount),
+    //             Description: lot.ShortDescription,
+    //             Email: email,
+    //             InvoiceId: parseInt(invoiceId)
+    //         }
+    //         try {
+    //             const response = await paymentRequest(payload);
 
-                if (response.status === 201) {
-                    setPaymentSuccess(true);
-                    setTimeout(() => {
-                        setPaymentSuccess(false);
-                        navigate('/home')
-                    }, 3000);
-                    // SuccessMessage("Payment successful!");
-                } else {
-                    ErrorMessage("Payment failed. Please try again.");
-                }
-            } catch (err: any) {
-                console.error("Error processing payment: " + err.message);
-            } finally {
-                handleClosePaymentModal();
-            }
+    //             if (response.status === 201) {
+    //                 setPaymentSuccess(true);
+    //                 setTimeout(() => {
+    //                     setPaymentSuccess(false);
+    //                     navigate('/home')
+    //                 }, 3000);
+    //                 // SuccessMessage("Payment successful!");
+    //             } else {
+    //                 ErrorMessage("Payment failed. Please try again.");
+    //             }
+    //         } catch (err: any) {
+    //             console.error("Error processing payment: " + err.message);
+    //         } finally {
+    //             handleClosePaymentModal();
+    //         }
 
-            setLoading(false);
-        };
+    //         setLoading(false);
+    //     };
 
-        return (
-            <form onSubmit={handleSubmit} style={styles.form}>
-                <h2>💳 Stripe Payment</h2>
-                <input type="text" placeholder="Enter amount" value={lot.BidStartAmount} onChange={(e) => e.preventDefault()} style={styles.input} required />
-                <input type="email" placeholder="Enter email" value={clientEmail} onChange={(e) => e.preventDefault()} style={styles.input} required />
+    //     return (
+    //         <form onSubmit={handleSubmit} style={styles.form}>
+    //             <h2>💳 Stripe Payment</h2>
+    //             <input type="text" placeholder="Enter amount" value={lot.BidStartAmount} onChange={(e) => e.preventDefault()} style={styles.input} required />
+    //             <input type="email" placeholder="Enter email" value={clientEmail} onChange={(e) => e.preventDefault()} style={styles.input} required />
 
-                <CardElement options={{ hidePostalCode: true, style: styles.card }} />
+    //             <CardElement options={{ hidePostalCode: true, style: styles.card }} />
 
-                <button type="submit" disabled={!stripe || loading} style={styles.button}>
-                    {loading ? "Processing..." : "Pay Now"}
-                </button>
+    //             <button type="submit" disabled={!stripe || loading} style={styles.button}>
+    //                 {loading ? "Processing..." : "Pay Now"}
+    //             </button>
 
-                {message && <p style={styles.message}>{message}</p>}
-            </form>
-        );
-    };
+    //             {message && <p style={styles.message}>{message}</p>}
+    //         </form>
+    //     );
+    // };
 
     // Styles
-    const styles: any = {
-        // form: { width: "400px", margin: "50px auto", padding: "10px", border: "1px solid #ddd", borderRadius: "5px", background: "#fff", textAlign: "center" },
-        input: { width: "90%", padding: "10px", marginBottom: "10px", border: "1px solid #ddd", borderRadius: "5px" },
-        card: { padding: "10px", border: "1px solid #ddd", borderRadius: "5px", marginBottom: "10px" },
-        button: { marginTop: "10px", background: "#28a745", color: "#fff", padding: "10px", border: "none", borderRadius: "5px", cursor: "pointer", width: "100%" },
-        message: { marginTop: "10px", color: "#d9534f" },
-    };
+    // const styles: any = {
+    //     // form: { width: "400px", margin: "50px auto", padding: "10px", border: "1px solid #ddd", borderRadius: "5px", background: "#fff", textAlign: "center" },
+    //     input: { width: "90%", padding: "10px", marginBottom: "10px", border: "1px solid #ddd", borderRadius: "5px" },
+    //     card: { padding: "10px", border: "1px solid #ddd", borderRadius: "5px", marginBottom: "10px" },
+    //     button: { marginTop: "10px", background: "#28a745", color: "#fff", padding: "10px", border: "none", borderRadius: "5px", cursor: "pointer", width: "100%" },
+    //     message: { marginTop: "10px", color: "#d9534f" },
+    // };
 
     return (
         <Box pb={'80px'}>
@@ -236,7 +444,8 @@ const Cart = () => {
                                         fullWidth
                                         name="email"
                                         placeholder="Email"
-                                        onChange={(e: any) => { formik.handleChange(e); setClientEmail(e.target.value) }}
+                                        // onChange={(e: any) => { formik.handleChange(e); setClientEmail(e.target.value) }}
+                                        onChange={formik.handleChange}
                                         error={formik.touched.email && Boolean(formik.errors.email)}
                                         helperText={formik.touched.email && typeof formik.errors.email === 'string' ? formik.errors.email : ''}
                                     />
@@ -433,7 +642,17 @@ const Cart = () => {
                 <Dialog open={paymentModal} onClose={handleClosePaymentModal} style={{ width: '100%' }}>
                     <DialogContent>
                         <Elements stripe={stripePromise}>
-                            <CheckoutForm />
+                            {/* <CheckoutForm /> */}
+                            <CheckoutForm
+                                clientEmail={checkoutEmail}
+                                setClientEmail={setCheckoutEmail}
+                                handleClosePaymentModal={handleClosePaymentModal}
+                                lot={lot}
+                                email={email}
+                                setPaymentSuccess={setPaymentSuccess}
+                                navigate={navigate}
+                                paymentRequest={paymentRequest}
+                            />
                         </Elements>
                     </DialogContent>
                 </Dialog>
