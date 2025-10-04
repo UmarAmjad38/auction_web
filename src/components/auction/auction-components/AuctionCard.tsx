@@ -180,10 +180,11 @@ const AuctionCard = ({
                         </Button>
                         : headerType === "lots" ?
                             <Box display={'flex'} flexDirection={'column'} width={'100%'}>
-                                <Button className={classes.bidButton} variant="contained" color="primary" onClick={() => handleBidNow()}>
-                                    Bid Now ${cardData.bidAmount}
+                                <Button className={classes.bidButton} variant="contained" color="primary" onClick={handleCardMediaClick}>
+                                    {/* Bid Now ${cardData.bidAmount} */}
+                                    View Details
                                 </Button>
-                                {user &&
+                                {/* {user &&
                                     <Box>
                                         <Typography m={'10px 0'} sx={{ fontSize: '12px', color: '#212121', fontWeight: 500 }}>
                                             You can enter your custom Amount
@@ -216,7 +217,7 @@ const AuctionCard = ({
                                             </Button>
                                         </Box> */}
 
-                                        <Box >
+                                        {/* <Box >
                                             <TextField
                                                 type='number'
                                                 variant="outlined"
@@ -245,9 +246,9 @@ const AuctionCard = ({
                                                     ),
                                                 }}
                                             />
-                                        </Box>
-                                    </Box>
-                                }
+                                        </Box> */}
+                                    {/* </Box>
+                                } */}
                             </Box>
                             : headerType === "live" ?
                                 <Button onClick={() => navigate(`/live/details?aucId=${cardData.id}`)} className={classes.bidButton} variant="contained" color="primary">

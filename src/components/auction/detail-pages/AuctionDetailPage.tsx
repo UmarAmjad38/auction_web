@@ -358,7 +358,7 @@ const AuctionDetailPage = () => {
                                 {[
                                     {
                                         title: "Terms and Conditions",
-                                        content: auctionDetails.TermsConditions,
+                                        content: auctionDetails.termsConditions,
                                     },
                                     {
                                         title: "Payment Information",

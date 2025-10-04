@@ -205,20 +205,22 @@ const LotDetailPage = () => {
         try {
             const response = await placeBidRequest(payload);
             if (response.status === 201) {
-
-                const range: any = bidRanges.find((range: any) =>
-                    bidAmount >= range.startAmount &&
-                    bidAmount < range.endAmount
-                );
-                if (range) {
-                    setBidAmount(bidAmount + range.bidRangeAmount);
-                    setAmount(bidAmount + range.bidRangeAmount);
-                } else {
-                    setBidAmount(bidAmount + 400);
-                    setAmount(bidAmount + 400);
-                }
+                
+                // const range: any = bidRanges.find((range: any) =>
+                //     bidAmount >= range.startAmount &&
+                //     bidAmount < range.endAmount
+                // );
+                // if (range) {
+                //     setBidAmount(bidAmount + range.bidRangeAmount);
+                //     setAmount(bidAmount + range.bidRangeAmount);
+                // } else {
+                //     setBidAmount(bidAmount + 400);
+                //     setAmount(bidAmount + 400);
+                // }
 
                 SuccessMessage('Bid placed successfully');
+                // Re-fetch lot details to update current bid and next bid amount
+                fetchLotDetails();
             } else {
                 ErrorMessage('Failed to place bid');
             }
@@ -350,10 +352,10 @@ const LotDetailPage = () => {
                                 Bid Now: ${bidAmount}
                             </Button>
 
-                            <Divider sx={{ my: 2 }} />
+                            {/* <Divider sx={{ my: 2 }} /> */}
 
                             {/* Bid Price Section */}
-                            <Typography sx={{ fontWeight: 600, mt: '30px', fontSize: '18px' }}>Bid Price</Typography>
+                            {/* <Typography sx={{ fontWeight: 600, mt: '30px', fontSize: '18px' }}>Bid Price</Typography>
                             <Box className={classes.bidAmount} sx={{ display: "flex", alignItems: "center", mt: '10px' }}>
                                 <TextField
                                     placeholder="Enter Your Bid Amount"
@@ -372,7 +374,7 @@ const LotDetailPage = () => {
                                 >
                                     Submit
                                 </Button>
-                            </Box>
+                            </Box> */}
                         </Box>
                     }
                 </Grid>

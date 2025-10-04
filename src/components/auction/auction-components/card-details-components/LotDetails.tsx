@@ -62,12 +62,13 @@ const LotDetails = ({ lotData }: any) => {
         <Box className={classes.container}>
 
             <Box mb={'20px'} display={'flex'} alignItems={'center'}>
-                <Typography color='primary' fontSize={'16px'} fontWeight={700}>
-                    Lot  #{lotData.id}
+                <Typography color='primary' fontSize={'15px'} fontWeight={700}>
+                    {/* Lot  #{lotData.id} */}
+                    Lot  #{lotData.id} - Current Bid: ${lotData.bidAmount}
                 </Typography>
 
                 {/* Date Range */}
-                <Box ml={'20px'} className={`${classes.iconText} ${classes.flexItem}`}>
+                <Box ml={'8px'} className={`${classes.iconText} ${classes.flexItem}`}>
                     <WatchLaterRoundedIcon fontSize="small" color="primary" />
                     {countdown !== "" ?
                         <Box display={"flex"} flex={1} >
