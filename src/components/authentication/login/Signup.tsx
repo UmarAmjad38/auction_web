@@ -14,6 +14,7 @@ const SignupForm = ({ setEmail, setRegisterData }: any) => {
     const navigate = useNavigate();
 
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Formik setup
@@ -45,6 +46,10 @@ const SignupForm = ({ setEmail, setRegisterData }: any) => {
 
     const togglePasswordVisibility = () => {
         setShowPassword((prev) => !prev);
+    };
+
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword((prev) => !prev);
     };
 
     const handleEmailVerification = async (payload: any) => {
@@ -249,7 +254,7 @@ const SignupForm = ({ setEmail, setRegisterData }: any) => {
                         </Typography>
                         <CustomTextField
                             fullWidth
-                            type={showPassword ? 'text' : 'password'}
+                            type={showConfirmPassword ? 'text' : 'password'}
                             margin="dense"
                             variant="outlined"
                             required
@@ -270,11 +275,11 @@ const SignupForm = ({ setEmail, setRegisterData }: any) => {
                                                 </Typography>
                                             }
                                             <IconButton
-                                                onClick={togglePasswordVisibility}
+                                                onClick={toggleConfirmPasswordVisibility}
                                                 edge="end"
                                                 sx={{ color: 'primary.main' }}
                                             >
-                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                                             </IconButton>
                                         </InputAdornment>
                                     ),
