@@ -61,31 +61,22 @@ const LotDetails = ({ lotData }: any) => {
     return (
         <Box className={classes.container}>
 
-            <Box mb={'20px'} display={'flex'} alignItems={'center'}>
+            <Box display={'flex'} alignItems={'center'}>
                 <Typography color='primary' fontSize={'15px'} fontWeight={700}>
-                    {/* Lot  #{lotData.id} */}
-                    Lot  #{lotData.id} - Current Bid: ${lotData.bidAmount}
+                    Lot #{lotData.id} -
                 </Typography>
-
-                {/* Date Range */}
-                <Box ml={'8px'} className={`${classes.iconText} ${classes.flexItem}`}>
+                <Box ml={'3px'} display={'flex'} alignItems={'center'}>
                     <WatchLaterRoundedIcon fontSize="small" color="primary" />
-                    {countdown !== "" ?
-                        <Box display={"flex"} flex={1} >
-                            <Typography className={classes.text} sx={{ color: "rgba(33, 33, 33, 1)", whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                                &nbsp;{countdown}
-                            </Typography>
-                        </Box>
-                        :
-                        <Box display={"flex"} flex={0.7} >
-                            <Typography color={theme.palette.secondary.main} whiteSpace={'nowrap'}>
-                                Lot Ended
-                            </Typography>
-                        </Box>
-                    }
+                    <Typography className={classes.text} sx={{ color: countdown !== "" ? "rgba(33, 33, 33, 1)" : theme.palette.secondary.main, whiteSpace: 'normal', wordBreak: 'break-word', ml: 0.5 }}>
+                        {countdown !== "" ? countdown : "Lot Ended"}
+                    </Typography>
                 </Box>
             </Box>
-
+                <Box mb={'10px'}>
+                    <Typography color='primary' fontSize={'14px'} fontWeight={600}>
+                        Current Bid: ${lotData.bidAmount}
+                    </Typography>
+                </Box>
         </Box >
     );
 };

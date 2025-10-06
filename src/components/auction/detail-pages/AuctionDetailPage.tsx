@@ -220,8 +220,80 @@ const AuctionDetailPage = () => {
                 };
                 setIsCurrentAuction(formattedAuctionDetails.type === "current");
                 setAuctionDetails(formattedAuctionDetails);
+
+                // Format and set lots
+                if (lots && lots.length > 0) {
+                    const formattedLots = lots.map((item: any) => {
+                        // Determine if lot is live or ended
+                        const [day, month, year] = item.EndDate.split('-').map(Number);
+                        const endDateTime = new Date(year, month - 1, day);
+                        const [time, period] = item.EndTime.split(' ');
+                        let [hours, minutes] = time.split(':').map(Number);
+                        if (period.toLowerCase() === 'pm' && hours !== 12) hours += 12;
+                        if (period.toLowerCase() === 'am' && hours === 12) hours = 0;
+                        endDateTime.setHours(hours, minutes, 0, 0);
+                        const now = new Date();
+                        const isLive = endDateTime.getTime() > now.getTime();
+
+                        return {
+                            id: item.Id,
+                            lotNumber: item.LotNo,
+                            name: item.ShortDescription,
+                            endDate: item.EndDate,
+                            endTime: item.EndTime,
+                            description: item.LongDescription,
+                            countDown: "N/A",
+                            location: "N/A",
+                            image: item.Image,
+                            type: "current",
+                            bidAmount: item.BidStartAmount,
+                            sold: item.IsSold,
+                            date: `${item.StartDate} to ${item.EndDate}`,
+                            time: `${item.StartTime} to ${item.EndTime}`,
+                            auctionId: item.AuctionId,
+                            cityId: item.CityId,
+                            stateId: item.StateId,
+                            address: item.Address,
+                            isLive: isLive,
+                            details: {
+                                description: item.LongDescription,
+                                date: `${item.StartDate} to ${item.EndDate}`,
+                                time: `${item.StartTime} to ${item.EndTime}`,
+                                orderNumber: item.OrderNo,
+                                lot: item.LotNo,
+                                category: item.Category,
+                                subCategory: item.SubCategory,
+                                winner: {
+                                    email: "N/A", // Replace with actual data if available
+                                    phone: "N/A", // Replace with actual data if available
+                                    location: "N/A", // Replace with actual data if available
+                                },
+                            },
+                        };
+                    });
+                    const liveLots = formattedLots.filter((lot: any) => lot.isLive);
+                    setAuctionLots(liveLots);
+                    setPaginationedData(liveLots);
+
+                    // Fetch locations
+                    const locationResponse = await getStatesByCountry(1);
+                    if (locationResponse.data && locationResponse.data.length > 0) {
+                        const updatedLocation = locationResponse.data;
+                        setLocations(updatedLocation);
+                        setStates(updatedLocation);
+                    } else {
+                        setLocations([]);
+                    }
+                } else {
+                    setAuctionLots([]);
+                    setPaginationedData([]);
+                    setLocations([]);
+                }
             } else {
                 setAuctionDetails(null);
+                setAuctionLots([]);
+                setPaginationedData([]);
+                setLocations([]);
             }
         } catch (error) {
         } finally {
@@ -229,77 +301,7 @@ const AuctionDetailPage = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchAuctionLots = async () => {
-            let response;
-            if (isCurrentAuction) {
-                response = await getCurrentLots();
-            } else {
-                response = await getPastLots();
-            }
 
-            if (response.data.length > 0) {
-                const formattedLots = response.data.map((item: any) => ({
-                    id: item.Id,
-                    lotNumber: item.LotNo,
-                    name: item.ShortDescription,
-                    endDate: item.EndDate,
-                    endTime: item.EndTime,
-                    description: item.LongDescription,
-                    countDown: "N/A",
-                    location: "N/A",
-                    image: item.Image,
-                    type: "current",
-                    bidAmount: item.BidStartAmount,
-                    sold: item.IsSold,
-                    date: `${item.StartDate} to ${item.EndDate}`,
-                    time: `${item.StartTime} to ${item.EndTime}`,
-                    auctionId: item.AuctionId,
-                    cityId: item.CityId,
-                    stateId: item.StateId,
-                    address: item.Address,
-                    details: {
-                        description: item.LongDescription,
-                        date: `${item.StartDate} to ${item.EndDate}`,
-                        time: `${item.StartTime} to ${item.EndTime}`,
-                        orderNumber: item.OrderNo,
-                        lot: item.LotNo,
-                        category: item.Category,
-                        subCategory: item.SubCategory,
-                        winner: {
-                            email: "N/A", // Replace with actual data if available
-                            phone: "N/A", // Replace with actual data if available
-                            location: "N/A", // Replace with actual data if available
-                        },
-                    },
-                }));
-
-                const newLots: any = [];
-                formattedLots.map((lot: any) => {
-                    if (lot.auctionId == getQueryParam("aucId")) {
-                        newLots.push(lot);
-                    }
-                });
-
-                setAuctionLots(newLots);
-                setPaginationedData(newLots);
-
-                const locationResponse = await getStatesByCountry(1);
-                if (locationResponse.data && locationResponse.data.length > 0) {
-                    const updatedLocation = locationResponse.data;
-                    setLocations(updatedLocation);
-                    setStates(updatedLocation);
-                } else {
-                    setLocations([]);
-                }
-            } else {
-                setPaginationedData([]);
-                setAuctionLots([]);
-            }
-        };
-
-        fetchAuctionLots();
-    }, [isCurrentAuction]);
 
     useEffect(() => {
         if (selectedLocation) {
@@ -797,11 +799,16 @@ const AuctionDetailPage = () => {
                                         }}
                                     >
                                         <Typography sx={{ fontSize: "25px", fontWeight: 700 }}>
-                                            No match found for{" "}
-                                            <span style={{ color: theme.palette.primary.main }}>
-                                                {" "}
-                                                "{searchTerm ? searchTerm : selectedLocation}"
-                                            </span>
+                                            {searchTerm || selectedLocation ? (
+                                                <>
+                                                    No match found for{" "}
+                                                    <span style={{ color: theme.palette.primary.main }}>
+                                                        "{searchTerm || selectedLocation}"
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                "No lots available for this auction"
+                                            )}
                                         </Typography>
                                     </Box>
                                 )}

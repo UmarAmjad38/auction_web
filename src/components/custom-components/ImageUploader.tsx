@@ -56,13 +56,15 @@ const ImageUploader = ({ file, setFile }: any) => {
                 {file ? (
                     <Box>
                         <img
-                            src={URL.createObjectURL(file)}
+                            src={typeof file === 'string' ? file : URL.createObjectURL(file)}
                             alt="Preview"
                             style={{ maxWidth: '100%', maxHeight: '200px' }}
                         />
-                        <Typography>
-                            Size:  {formatSize(fileSize)}
-                        </Typography>
+                        {typeof file !== 'string' && (
+                            <Typography>
+                                Size:  {formatSize(fileSize)}
+                            </Typography>
+                        )}
                     </Box>
                 ) : (
                     <Box>
