@@ -35,8 +35,9 @@ const ForgotPassword = ({ setEmail }: any) => {
     const handleForgotPassword = async (email: any) => {
         try {
             // Critical request:
-            let response: any = await forgotPassword(email)
-            if (response.data.startsWith("OTP has been sent to:")) {
+            let response: any = await forgotPassword(email)            
+            if (response.data.Result == true) {
+                SuccessMessage(response.data.Message)
                 setEmail(email)
                 navigate('/reset-password');
             } else {

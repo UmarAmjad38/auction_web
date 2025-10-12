@@ -17,7 +17,7 @@ const Invoices = () => {
 
     const [page, setPage] = useState<number>(0);
     const [selectedInvoice, setSelectedInvoice] = useState({});
-    const [paidInvoice, setPaidInvoice] = useState<boolean>(true);
+    const [paidInvoice, setPaidInvoice] = useState<boolean>(false);
     const [viewDetails, setViewDetails] = useState(false);
     const rowsPerPage = 10;
 

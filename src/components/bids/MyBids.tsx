@@ -36,17 +36,13 @@ const PaymentTracking = () => {
 
 
     useEffect(() => {
-        if (!isFetchingData) {
-            setIsFetchingData(true)
-            fetchBidHistory();
-        }
+        setIsFetchingData(true);
+        fetchBidHistory();
     }, [isWinning])
 
-    // useEffect(() => {
-    //     fetchBidHistory();
-    // }, [isWinning])
-
     const handleFilterChange = (filter: any) => {
+        setInvoices([]);
+        setPage(0);
         setIsWinning(filter);
         handleMenuClose();
     };
@@ -60,12 +56,20 @@ const PaymentTracking = () => {
 
         try {
             const response = isWinning
-                ? await getBidHistory(client.id, true)
-                : await getBidHistory(client.id, false);
+                ? await getBidHistory(clientId, true)
+                : await getBidHistory(clientId, false);
 
-            if (response.data && response.data.length > 0) {
+            let bidData = [];
+            if (response.data) {
+                if (Array.isArray(response.data)) {
+                    bidData = response.data;
+                } else if (response.data.Result === true && response.data.Data) {
+                    bidData = response.data.Data;
+                }
+            }
 
-                const formattedResponse = response.data.map((bid: any) => ({
+            if (bidData.length > 0) {
+                const formattedResponse = bidData.map((bid: any) => ({
                     id: bid.Id,
                     name: bid.Name,
                     highestBidderName: bid.HighestBidder,
@@ -76,14 +80,15 @@ const PaymentTracking = () => {
                 }));
 
                 setInvoices(formattedResponse);
-
             } else {
                 setInvoices([]);
             }
 
         } catch (error) {
+            console.error('Error fetching bid history:', error);
+            setInvoices([]);
         } finally {
-            setIsFetchingData(false)
+            setIsFetchingData(false);
         }
     };
 

@@ -35,6 +35,7 @@ const LotDetailPage = () => {
 
     const [lotDetails, setLotDetails]: any = useState({})
     const [isFetchingData, setIsFetchingData] = useState(false)
+    const [TermsAndConditions, setTermsAndConditions]:any = useState(false)
     const [bidAmount, setBidAmount] = useState(0)
     const [amount, setAmount] = useState(bidAmount);
 
@@ -137,6 +138,7 @@ const LotDetailPage = () => {
                 ...(response.data?.Images || []).map((img: any) => img.Image)
             ];
             const bidsRange = response.data?.BidsRange || [];
+            const TAndC = response.data?.TermsAndConditions || [];
 
             if (lot) {
                 const formattedLotDetails = {
@@ -184,6 +186,7 @@ const LotDetailPage = () => {
                 setBidRanges(formattedLotDetails.bidsRange)
                 setLotImages(images)
                 setLotDetails(formattedLotDetails);
+                setTermsAndConditions(TAndC);
                 const bidRange = formattedLotDetails.bidsRange.find((range: any) =>
                     formattedLotDetails.highestBid >= range.startAmount &&
                     formattedLotDetails.highestBid < range.endAmount
@@ -407,8 +410,8 @@ const LotDetailPage = () => {
 
                 <Grid item xs={12} md={6} sx={{ mt: 4 }} className={classes.accordianGrid}>
                     {[
-                        { title: "Terms and Conditions", content: lotDetails?.termCondition || "No terms found for this lot!" },
-                        { title: "Payment Information", content: lotDetails?.paymentTerms || "No terms found for this lot!" },
+                        { title: "Terms and Conditions", content: TermsAndConditions?.TermsConditions || "No terms found for this lot!" },
+                        { title: "Payment Information", content: TermsAndConditions?.PaymentTerms || "No terms found for this lot!" },
                         {
                             title: "Pickup and Shipping Details", content:
                                 `We offer shipping for this lot. Please contact us for a quote. We use UPS, USPS, and FedEx for all shipping. We can also accommodate local pickup.`
