@@ -175,7 +175,7 @@ const AuctionCard = ({
                 {/* Action Buttons */}
                 <Box className={classes.actionButtons}>
                     {headerType === "auction" || headerType === "home" ?
-                        <Button className={classes.viewButton} variant={"contained"} onClick={() => navigate(`/current-auctions/details?aucId=${cardData.id}`)} >
+                        <Button className={classes.bidButton} variant={"contained"} onClick={() => navigate(`/current-auctions/details?aucId=${cardData.id}`)} >
                             View Auction
                         </Button>
                         : headerType === "lots" ?
