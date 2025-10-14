@@ -14,11 +14,37 @@ import { getAllLocations, getCitiesByState, getCurrentAuctions, getCurrentLocati
 import NoRecordFound from '../../utils/NoRecordFound';
 import theme from '../../theme';
 
+import { useLocation, useNavigate } from 'react-router-dom';
+
 const CurrentAuctions = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
     const [fadeIn, setFadeIn] = useState(false); // Fade control state
     const [isFetchingData, setIsFetchingData] = useState(false);
-    const [isCurrentAuction, setIsCurrentAuction] = useState(true); // Toggle between Current and Past Auctions
+    const [isCurrentAuction, setIsCurrentAuction] = useState(() => {
+        const urlParams = new URLSearchParams(location.search);
+        const filter = urlParams.get('filter');
+        return filter !== 'past';
+    }); // Toggle between Current and Past Auctions
     const [searchTerm, setSearchTerm]: any = useState(""); // Filtered data state
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(location.search);
+        const filter = urlParams.get('filter');
+        const shouldBeCurrent = filter !== 'past';
+        if (shouldBeCurrent !== isCurrentAuction) {
+            setIsCurrentAuction(shouldBeCurrent);
+        }
+    }, [location.search, isCurrentAuction]);
+
+    // Removed URL cleanup to keep the tab active
+
+    useEffect(() => {
+        if (!isFetchingData) {
+            setIsFetchingData(true);
+            fetchAuctionData(isCurrentAuction);
+        }
+    }, [isCurrentAuction]);
 
     // Filter location states:
     const [selectedLocation, setSelectedLocation]: any = useState("");
@@ -73,18 +99,11 @@ const CurrentAuctions = () => {
         }
     };
 
-    useEffect(() => {
-        if (!isFetchingData) {
-            setIsFetchingData(true)
-            fetchAuctionData();
-        }
-    }, [isCurrentAuction])
-
-    const fetchAuctionData = async () => {
+    const fetchAuctionData = async (isCurrent: boolean) => {
         try {
             // Critical request:
             let response;
-            if (isCurrentAuction) {
+            if (isCurrent) {
                 response = await getCurrentAuctions()
             } else {
                 response = await getPastAuctions();
@@ -145,7 +164,17 @@ const CurrentAuctions = () => {
                 setSearchTerm={setSearchTerm}
                 onToggle={() => {
                     if (!isFetchingData) {
-                        setIsCurrentAuction((prev) => !prev)
+                        const newIsCurrent = !isCurrentAuction;
+                        setIsCurrentAuction(newIsCurrent);
+                        // Update URL param based on tab
+                        const urlParams = new URLSearchParams(location.search);
+                        if (newIsCurrent) {
+                            urlParams.delete('filter');
+                        } else {
+                            urlParams.set('filter', 'past');
+                        }
+                        const newSearch = urlParams.toString();
+                        navigate({ search: newSearch }, { replace: true });
                     }
                 }}
                 selectedLocation={selectedLocation}
