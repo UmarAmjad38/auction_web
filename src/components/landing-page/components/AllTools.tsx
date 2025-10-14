@@ -29,16 +29,16 @@ const AllTools = () => {
                     <Card className={classes.cardStyles}>
                         <Box className={classes.toolBox}>
                             <Typography className={classes.titleStyles}>
-                                Current and Upcoming Auctions:
+                                Current Auctions:
                             </Typography>
                             <Typography variant="body2" sx={{ marginBottom: 2 }}>
-                                Upload blood test reports in PDF, JPG format and get
-                                the AI-generated blood report.
+                                Discover the latest art auctions happening now. Browse through active listings, explore details, and place your bids in real time to secure your favorite artwork.
                             </Typography>
                             <Button
                                 variant="contained"
                                 color="primary"
                                 endIcon={<ArrowOutwardIcon />}
+                                onClick={() => window.open('https://parkersauction.com/current-auctions', '_blank')}
                                 sx={{
                                     textTransform: "none",
                                     fontWeight: 500,
@@ -50,7 +50,7 @@ const AllTools = () => {
                                     heught: '42px'
                                 }}
                             >
-                                Learn More
+                                Explore
                             </Button>
                         </Box>
                     </Card>
@@ -60,13 +60,13 @@ const AllTools = () => {
                                 Past Auctions:
                             </Typography>
                             <Typography variant="body2" sx={{ marginBottom: 2 }}>
-                                User enters the health data and our platform will use GPT-4
-                                to give you the right suggestions about your health.
+                                View results from previous auctions, check final bid prices, and explore which artworks were sold. Perfect for understanding market trends and valuation.
                             </Typography>
                             <Button
                                 variant="contained"
                                 color="primary"
                                 endIcon={<ArrowOutwardIcon />}
+                                onClick={() => window.open('https://parkersauction.com/current-auctions?filter=past', '_blank')}
                                 sx={{
                                     textTransform: "none",
                                     fontWeight: 500,
@@ -78,7 +78,7 @@ const AllTools = () => {
                                     heught: '42px'
                                 }}
                             >
-                                Learn More
+                                Explore
                             </Button>
                         </Box>
                     </Card>
@@ -111,17 +111,16 @@ const AllTools = () => {
                     <Card className={classes.cardStyles}>
                         <Box className={classes.toolBox}>
                             <Typography variant="h6" className={classes.titleStyles}>
-                                Shipping Services:
+                                Listings:
                             </Typography>
                             <Typography variant="body2" sx={{ marginBottom: 2 }}>
-                                Our platform gets the DNA data of the user, then
-                                integrates and provides personalized insights based on
-                                predisposition.
+                                Browse our complete collection of art pieces available for sale. Each listing includes artist details, starting bid, and estimated value for quick insights.
                             </Typography>
                             <Button
                                 variant="contained"
                                 color="primary"
                                 endIcon={<ArrowOutwardIcon />}
+                                onClick={() => window.open('https://parkersauction.com/listings', '_blank')}
                                 sx={{
                                     textTransform: "none",
                                     fontWeight: 500,
@@ -133,23 +132,23 @@ const AllTools = () => {
                                     heught: '42px'
                                 }}
                             >
-                                Learn More
+                                Explore
                             </Button>
                         </Box>
                     </Card>
                     <Card className={classes.cardStyles}>
                         <Box className={classes.toolBox}>
                             <Typography variant="h6" className={classes.titleStyles}>
-                                Featured Products:
+                                Live Streams:
                             </Typography>
                             <Typography variant="body2" sx={{ marginBottom: 2 }}>
-                                Get into with our professional nutritionist and trainers to
-                                get maximum health benefits.
+                                Watch ongoing auctions live on our platform. Experience the thrill of bidding in real time and never miss a moment from any active auction event.
                             </Typography>
                             <Button
                                 variant="contained"
                                 color="primary"
                                 endIcon={<ArrowOutwardIcon />}
+                                onClick={() => window.open('https://parkersauction.com/live', '_blank')}
                                 sx={{
                                     textTransform: "none",
                                     fontWeight: 500,
@@ -161,7 +160,7 @@ const AllTools = () => {
                                     heught: '42px'
                                 }}
                             >
-                                Learn More
+                                Explore
                             </Button>
                         </Box>
                     </Card>
